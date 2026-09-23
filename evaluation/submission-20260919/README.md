@@ -38,19 +38,22 @@ AUC is undefined for 61 users; the review-weighted AUC denominator is 349,421,80
 
 Each outer-fold model has three calibration coefficients and 600 XGBoost trees. Counting all split and leaf nodes in the serialized boosters: fold 0 has 72,458 nodes (72,461 calibration-coefficient-plus-node count); fold 1 has 73,326 nodes (73,329 combined count). Across both stored fold models: six calibration coefficients and 145,784 XGBoost nodes. This is a structural node count, not a leaf-weight-only parameter count.
 
-**Execution record.** `/root/srs-autoresearch/temp/fullrun-chain-vps.sh` ran on a private 16-vCPU, 62-GiB VPS, with `CPUQuota=16`, `MemoryHigh=56 GiB`, `MemoryMax=58 GiB`, and swap disabled. It fit folds 0 and 1 concurrently at eight threads each, then scored eight shards at two threads each, then generated the report. Journal timestamps: 2026-09-23 15:28:44 to 21:34:09 CEST (**6 h 05 min 25 s wall time**, including the missing-dependency score retries). Systemd reported approximately **73 h 03 min of cumulative CPU time** for the main fit, the successful scoring/report service invocation, and short retries. The precomputed full-population base caches were reused and validated; these times do not cover baseline-cache generation.
+**Execution record.** The exact script run as `/root/srs-autoresearch/temp/fullrun-chain-vps.sh` is preserved at `scripts/fullrun-chain-vps.sh` in this archive. It ran on a private 16-vCPU, 62-GiB VPS, with `CPUQuota=16`, `MemoryHigh=56 GiB`, `MemoryMax=58 GiB`, and swap disabled. It fit folds 0 and 1 concurrently at eight threads each, then scored eight shards at two threads each, then generated the report. Journal timestamps: 2026-09-23 15:28:44 to 21:34:09 CEST (**6 h 05 min 25 s wall time**, including the missing-dependency score retries). Systemd reported approximately **73 h 03 min of cumulative CPU time** for the main fit, the successful scoring/report service invocation, and short retries. The precomputed full-population base caches were reused and validated; these times do not cover baseline-cache generation.
 
 This is a nested refit on a public dataset used during prior development, not a prospective unseen-dataset result. It is an instantaneous predictor, not evidence of improved scheduling. The upstream no-same-day benchmark currently reports **RWKV-Instant at 0.2773 LogLoss**; our 0.298813 is **not** a claim to outperform it. Our paired comparison is only against FSRS-7 on the same held users. Our cross-user training protocol is not yet integrated into the upstream algorithm registry.
 
 ## Reproduction
 
-Obtain the dataset directly from https://huggingface.co/datasets/open-spaced-repetition/anki-revlogs-10k, complying with its access/no-redistribution terms. The runner expects `revlogs/user_id=<id>/data.parquet` and the cards metadata partitions under `--data`.
+Obtain the gated dataset directly from https://huggingface.co/datasets/open-spaced-repetition/anki-revlogs-10k at revision `75299740cff05894ef42d7ad990666691efdd2da`, complying with its access/no-redistribution terms. The runner expects `revlogs/user_id=<id>/data.parquet` and the cards metadata partitions under `--data`.
 
-Obtain upstream separately; its source is not relicensed by this submission. The exercised setup was:
+Obtain upstream separately; its source is not relicensed by this submission. The recorded baseline used a sparse checkout; a full checkout changes the source-identity hash even at the same commit. This setup was exercised against a fresh clone and reproduces the manifest's upstream source hash `36f1f22d400930d8b7bb18fae0f401db045ad066ba5bf4022c551f4036946b90` (64 of 87 tracked Python files present):
 
 ```sh
-git clone --filter=blob:none https://github.com/open-spaced-repetition/srs-benchmark \
+git clone --filter=blob:none --no-checkout https://github.com/open-spaced-repetition/srs-benchmark \
   evaluation/submission-20260919/upstream
+git -C evaluation/submission-20260919/upstream sparse-checkout set --no-cone \
+  '/*' '!/plots/' '!/result-20k/' '!/notebook/' '!/weights/' \
+  '!/pretrain/' '!/result/' '!/rwkv/' '!/reptile/'
 git -C evaluation/submission-20260919/upstream checkout \
   bd9110f791e5b37282c55a9aa8db35f68f0c4aa2
 cd evaluation/submission-20260919/upstream
@@ -61,22 +64,26 @@ evaluation/submission-20260919/upstream/.venv/bin/python \
   evaluation/submission-20260919/run.py \
   --upstream evaluation/submission-20260919/upstream \
   --data /path/to/anki-revlogs-10k \
-  --out evaluation/submission-20260919/run --workers 1 --threads 4
+  --out evaluation/submission-20260919/reproduction-run --workers 1 --threads 4
 ```
 
-`--stage baseline|fit|score|report` selects a resumable stage. The run manifest rejects source/protocol/user-set changes. Base caches require matching source/data provenance, hashes and chronological row identities. Training records the calibration dependency users; final predictions must use their designated outer fold. Report generation requires all frozen users. Use a new output directory for a changed experiment.
+`--stage baseline|fit|score|report` selects a resumable stage. The bundled `run/` contains published, path-redacted results: **never use it as `--out`**. Use a fresh directory such as `reproduction-run`; the run manifest rejects source/protocol/user-set changes. Base caches require matching source/data provenance, hashes and chronological row identities. Training records the calibration dependency users; final predictions must use their designated outer fold. Report generation requires all frozen users.
 
 The full-corpus feature matrix is not materialized in RAM: per-user feature batches and XGBoost external memory keep the training path bounded. Raw/per-review caches are local reconstruction inputs and are excluded from distribution.
 
 ## Verify and package
 
-The release archive omits upstream source, raw reviews and per-review caches. From an extracted archive, install `requirements.txt` and run:
+The release archive omits upstream source, raw reviews and per-review caches. From a **freshly extracted archive**, create the verification environment **outside** the archive (the verifier rejects extra files), then run this data-free check before cloning upstream or running tests:
 
 ```sh
-python evaluation/submission-20260919/verify_submission.py --root .
+uv venv ../audit-venv --python 3.14
+uv pip install --python ../audit-venv/bin/python -r requirements.txt
+../audit-venv/bin/python evaluation/submission-20260919/verify_submission.py --root .
 ```
 
-The verifier checks every distributed file against `SHA256SUMS`, training-source hashes, model hashes, exact split/calibration lineage, per-user aggregate coverage and provenance, reported metric means, and batch/streaming inference parity. To assemble the final archive after a complete frozen run, transfer `run-vps/` into this checkout first. The packager reads each user's `base/*.json` provenance and `scores/*.json`, plus both fold models and report files; the large `base/*.npz` prediction caches are **not** needed for packaging and must not be published:
+The packaged behavioral tests require the pinned upstream checkout above; run them after verification with `evaluation/submission-20260919/upstream/.venv/bin/python -m pytest -q evaluation/submission-20260919/test_submission.py evaluation/submission-20260919/test_baseline.py`.
+
+The verifier checks every distributed file against `SHA256SUMS`, the recorded run script, training-source hashes, model hashes, exact split/calibration lineage, per-user aggregate coverage and provenance, reported metric means, and batch/streaming inference parity. To assemble the final archive after a complete frozen run, transfer `run-vps/` into this checkout first. The packager reads each user's `base/*.json` provenance and `scores/*.json`, plus both fold models and report files; the large `base/*.npz` prediction caches are **not** needed for packaging and must not be published:
 
 ```sh
 mkdir -p temp/run-vps-package-input
@@ -103,13 +110,12 @@ The historical local batch slice was capped at 14 GiB with swap disabled. That d
 
 To reproduce the completed full-coverage refit, put **all 9,999 users' matching `.json` sidecars and `.npz` caches** into a new output directory's `base/` (including user 6810). Alternatively, the `baseline` stage generates missing caches and validates existing ones. Then refit both outer folds from scratch:
 
-```sh
 RUN=evaluation/submission-20260919/run-full
 DATA=/path/to/anki-revlogs-10k
-python evaluation/submission-20260919/run.py --out "$RUN" --data "$DATA" --stage baseline --workers 1
-python evaluation/submission-20260919/run.py --out "$RUN" --data "$DATA" --stage fit --threads 8
-python evaluation/submission-20260919/run.py --out "$RUN" --data "$DATA" --stage score --threads 2
-python evaluation/submission-20260919/run.py --out "$RUN" --data "$DATA" --stage report
+evaluation/submission-20260919/upstream/.venv/bin/python evaluation/submission-20260919/run.py --out "$RUN" --data "$DATA" --stage baseline --workers 1
+evaluation/submission-20260919/upstream/.venv/bin/python evaluation/submission-20260919/run.py --out "$RUN" --data "$DATA" --stage fit --threads 8
+evaluation/submission-20260919/upstream/.venv/bin/python evaluation/submission-20260919/run.py --out "$RUN" --data "$DATA" --stage score --threads 2
+evaluation/submission-20260919/upstream/.venv/bin/python evaluation/submission-20260919/run.py --out "$RUN" --data "$DATA" --stage report
 ```
 
 `--stage report` alone is **not** sufficient, and reusing `run-final/` is rejected (`run manifest differs`). `nested.make_splits()` shuffles with `rng.permutation(len(users))`, so adding 6810 moves **1,337 of the other 9,998 users** into a different outer fold and changes fold-0's training set by **2,123 users**. Every old fitted correction and booster is invalid for the full population.
@@ -118,6 +124,7 @@ python evaluation/submission-20260919/run.py --out "$RUN" --data "$DATA" --stage
 
 | Action | Observable outcome | Check |
 |---|---|---|
+| Inspect a full-coverage release archive | The exact recorded VPS procedure is present and covered by `SHA256SUMS` | `verify_submission.py` |
 | Fit an outer model with access restricted to training/validation users | Held-user outcomes are never read; perturbing their contents cannot change fitted calibration/model bytes | `test_submission.py` |
 | Build features after changing current/future outcomes, grades or response times | Current and earlier features/predictions stay unchanged | `test_submission.py` |
 | Predict with calibration saturated at zero or one | Streaming and batch predictions agree; logit clipping does not alter residual history | `test_submission.py` |

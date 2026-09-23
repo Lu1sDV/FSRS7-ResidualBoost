@@ -95,6 +95,7 @@ for name in ('probe.py', 'serve.py', 'feature-spec.json', 'feature-spec-fresh.js
     add(root / 'evaluation/tabular-probe-20260917' / name)
 add(root / 'evaluation/probe-stage2-20260918/stage2.py')
 add(root / 'scripts/make_submission_pack.sh')
+add(root / 'scripts/fullrun-chain-vps.sh')
 for name in ('manifest.json', 'splits.json', 'results.json', 'result-FSRS-7.jsonl',
              'result-B.jsonl', 'result-FSRS7-ResidualBoost.jsonl'):
     add(results / name, relative / 'run' / name)

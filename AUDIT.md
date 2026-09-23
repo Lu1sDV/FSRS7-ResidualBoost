@@ -31,7 +31,7 @@ The base is freshly generated from unmodified `script.process` at upstream commi
 
 ## Distribution and reproducibility standard
 
-The release contains source, two fitted boosters, calibration/lineage records, aggregate per-user metrics and provenance. It excludes raw reviews, card metadata, per-review predictions and feature matrices under the dataset's no-public-redistribution notice. Upstream source is pinned but obtained separately and is not relicensed. The archive has full-file SHA-256 coverage, portable artifact paths, no source-checkout path, a detached ZIP checksum, and a verifier executed both before compression and after fresh extraction.
+The release contains source, the exact VPS orchestration script (`scripts/fullrun-chain-vps.sh`), two fitted boosters, calibration/lineage records, aggregate per-user metrics and provenance. It excludes raw reviews, card metadata, per-review predictions and feature matrices under the dataset's no-public-redistribution notice. Upstream source is pinned and its recorded sparse-checkout exclusions are reproducible from the README, but it is obtained separately and is not relicensed. The archive has full-file SHA-256 coverage, portable artifact paths, no source-checkout path, a detached ZIP checksum, and a verifier executed both before compression and after fresh extraction.
 
 ## Historical gap resolved in the new run
 
@@ -40,5 +40,3 @@ The historical `run-final/` deferred user **6810** (1,939,325 scored reviews). T
 An earlier solo attempt on 6810 exceeded the local workstation's 24 GiB cgroup cap. A separate full-population fit was killed by host-wide OOM on the 30 GiB workstation at 2026-09-23 10:29:50; the baseline caches survived. The completed `run-vps/` evaluation used all **9,999** matching caches (including 6810), refitted both outer folds from scratch, scored **349,923,850** reviews, and produced a full report with **no deferred users** on a private 62 GiB host. The resulting equal-user LogLoss is **0.298813** versus **0.336968** for FSRS-7 on the same held users.
 
 The upstream benchmark's published **RWKV-Instant** score is **0.2773** on the no-same-day table; this submission does not claim to beat that model or to be integrated into the upstream algorithm registry. The public dataset informed prior feature/model selection, so nested fitting removes fitting leakage but does not supply a prospective unseen-population validation.
-
-

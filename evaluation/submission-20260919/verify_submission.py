@@ -41,6 +41,8 @@ def main():
     for relative, expected in listed.items():
         if digest(root / relative) != expected:
             raise ValueError(f"checksum mismatch: {relative}")
+    if not (root / "scripts/fullrun-chain-vps.sh").is_file():
+        raise ValueError("executed full-run procedure is missing from the archive")
     print(f"checksums: {len(listed)} files OK")
     here = root / "evaluation/submission-20260919"
     result_dir = here / "run"
