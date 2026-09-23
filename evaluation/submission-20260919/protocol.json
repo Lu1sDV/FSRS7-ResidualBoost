@@ -1,0 +1,23 @@
+{
+  "name": "FSRS7-ResidualBoost",
+  "upstream_revision": "bd9110f791e5b37282c55a9aa8db35f68f0c4aa2",
+  "dataset_revision": "75299740cff05894ef42d7ad990666691efdd2da",
+  "population": "users.json: all 9999 eligible current-upstream non-same-day benchmark users",
+  "expected_scored_reviews": 349923850,
+  "coverage_reference": {"upstream_path": "result/FSRS-7-short-secs-recency-equalize_test_with_non_secs.jsonl", "upstream_sha256": "b99147d239067cf41a3163925854c226ae1554bf86fc508d8ab96add36dc01af", "projection": "user and size only; no reference metrics or fitted parameters are evaluation inputs"},
+  "base_flags": ["--algo", "FSRS-7", "--short", "--secs", "--recency", "--equalize_test_with_non_secs"],
+  "base_training": "Unmodified pinned current upstream script.process; fresh chronological per-user five-fold training; only persistence callback replaced; CPU eager execution",
+  "observer_stream": "Scored reviews only, chronological order, state carried over base-fold boundaries; predict before outcome update",
+  "outer_folds": 2,
+  "split_seed": 20260919,
+  "validation_fraction_of_outer_training": 0.15,
+  "inner_calibration_folds": 3,
+  "calibration": "Three coefficients, intercept plus shrunk previous16/256 FSRS residuals; equal-user objective; zero initialization; inner-crossfitted training features; validation and outer-held users use beta fitted only on booster training users",
+  "shrinkage": 64,
+  "booster": {"objective": "binary:logistic", "tree_method": "hist", "device": "cpu", "max_depth": 6, "eta": 0.05, "subsample": 0.8, "colsample_bytree": 0.8, "min_child_weight": 20.0, "reg_lambda": 1.0, "eval_metric": "logloss", "seed": 20260917, "num_boost_round": 600, "early_stopping_rounds": 30},
+  "booster_weighting": "Equal user, review weights scaled to mean one separately over all training rows and all validation rows; not independently per batch",
+  "frozen_model_family": "Historical 42-feature all32_stream; no feature/hyperparameter selection on this rerun's outer scores",
+  "metrics": "Pinned upstream utils.evaluate on identical rows; equal-user means and upstream 99% BCa settings (9999 resamples, random_state42); undefined AUC null",
+  "claim_boundary": "Nested refit evaluation on a previously studied public benchmark, not a prospective unseen-dataset claim. Earlier development exposure is disclosed. Instantaneous prediction, not scheduling efficiency.",
+  "license_authorization": "User explicitly selected MIT on 2026-09-19 for own contributions/artifacts to extent rights held; upstream code and dataset restrictions unchanged"
+}

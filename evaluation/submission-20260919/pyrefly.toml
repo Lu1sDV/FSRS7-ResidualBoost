@@ -1,0 +1,4 @@
+project-includes = ["*.py"]
+search-path = [".", "../tabular-probe-20260917", "../probe-stage2-20260918", "upstream"]
+python-interpreter-path = "upstream/.venv/bin/python"
+python-version = "3.14"

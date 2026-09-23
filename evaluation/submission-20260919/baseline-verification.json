@@ -1,0 +1,38 @@
+{
+  "upstream_commit": "bd9110f791e5b37282c55a9aa8db35f68f0c4aa2",
+  "capture_sha256": "80727dcef434d5302fcc90432493e085dfa83d422b42610610dbabf3b60833cb",
+  "stock_cli_user": 1,
+  "stock_rows": 10620,
+  "max_probability_difference": 0.0,
+  "stock_metrics_parameters_and_coverage_equal": true,
+  "fresh_users": [
+    1,
+    2,
+    461
+  ],
+  "excluded_user": 4371,
+  "resume_preserves_hashes_and_mtimes": true,
+  "dataset_revision_mismatch_refused": 4,
+  "capture_and_runtime_mismatch_refused": 4,
+  "corrupt_cache_refused": true,
+  "runtime_versions": {
+    "fsrs-optimizer": "6.5.0",
+    "numpy": "2.5.1",
+    "pandas": "3.0.5",
+    "pyarrow": "25.0.0",
+    "python": "3.14.7",
+    "relplot": "1.0.3",
+    "scikit-learn": "1.9.0",
+    "scipy": "1.18.0",
+    "torch": "2.13.0+cu126"
+  },
+  "stock_fold_membership_equal": true,
+  "stock_additional_causal_fields_equal": [
+    "card_id",
+    "day_offset",
+    "rating",
+    "elapsed_seconds",
+    "duration",
+    "nth_today"
+  ]
+}

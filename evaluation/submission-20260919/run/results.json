@@ -1,0 +1,60 @@
+{
+  "users": 9999,
+  "reviews": 349923850,
+  "source": "new nested fit; historical results not reused",
+  "deferred_users": [],
+  "defer_reason": null,
+  "models": {
+    "FSRS-7": {
+      "LogLoss": {
+        "mean": 0.33696834163416345,
+        "n_users": 9999,
+        "ci99_half_width": 0.004201515087457808
+      },
+      "RMSE(bins)": {
+        "mean": 0.05928737943794379,
+        "n_users": 9999,
+        "ci99_half_width": 0.0010115296146798146
+      },
+      "AUC": {
+        "mean": 0.7220160288790501,
+        "n_users": 9938,
+        "ci99_half_width": 0.002092190491445378
+      }
+    },
+    "B": {
+      "LogLoss": {
+        "mean": 0.31147217621762174,
+        "n_users": 9999,
+        "ci99_half_width": 0.003803905195277707
+      },
+      "RMSE(bins)": {
+        "mean": 0.041366319431943195,
+        "n_users": 9999,
+        "ci99_half_width": 0.0005560900168737233
+      },
+      "AUC": {
+        "mean": 0.7681873118333669,
+        "n_users": 9938,
+        "ci99_half_width": 0.001992085554209988
+      }
+    },
+    "FSRS7-ResidualBoost": {
+      "LogLoss": {
+        "mean": 0.29881297529752976,
+        "n_users": 9999,
+        "ci99_half_width": 0.0037237466033524513
+      },
+      "RMSE(bins)": {
+        "mean": 0.03313147414741474,
+        "n_users": 9999,
+        "ci99_half_width": 0.0004733422433819724
+      },
+      "AUC": {
+        "mean": 0.79407709599517,
+        "n_users": 9938,
+        "ci99_half_width": 0.0019245537699730253
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "users": 16,
+  "reviews": 62920,
+  "rounds": 4,
+  "all_four_stages_completed": true,
+  "all_nine_baseline_metrics_match_original_upstream_capture": true,
+  "changed_xgboost_version_refused": true,
+  "source_sha256": {
+    "evaluation/submission-20260919/run.py": "8dd44b41c9c564dfeee0eeeb660f9fda8df22296a3b5e73c6bcd6f18b05207bd",
+    "evaluation/submission-20260919/baseline.py": "80727dcef434d5302fcc90432493e085dfa83d422b42610610dbabf3b60833cb",
+    "evaluation/submission-20260919/nested.py": "0950b64c9394999353c242c702de9f3ec918bd2f8c15032d5d6a62a35f2a9b48",
+    "evaluation/submission-20260919/protocol.json": "619c9b7bdfc1fe33110db36b41ff197ebbbe6f2c5457b18e8756fffb63655cbf",
+    "evaluation/tabular-probe-20260917/probe.py": "337fcf1f9b46f492c1c323de6d82745ef9385047ae1383ed1bdc2db48c248b81",
+    "evaluation/tabular-probe-20260917/serve.py": "3dd2971800839d3412ca7a2f728795c7a060f00e7bb12101de05e05dd3373f7e",
+    "evaluation/probe-stage2-20260918/stage2.py": "9cce5372451148fb6c240380428b924d97b2b3e6a96edee6b83b0e0415bd27e1"
+  },
+  "scientific_use": "integration smoke only; not a benchmark claim",
+  "regression_tests_passed": 21,
+  "ruff_passed": true,
+  "pyrefly_errors": 0,
+  "saturated_streaming_regression_passed": true
+}
