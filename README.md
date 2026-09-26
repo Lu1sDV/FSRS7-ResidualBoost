@@ -86,7 +86,7 @@ Then run into a **new output directory**:
 
 ```sh
 evaluation/submission-20260919/upstream/.venv/bin/python \
-  evaluation/submission-20260919/run.py \
+  evaluation/submission-20260919/run_hardened.py \
   --upstream evaluation/submission-20260919/upstream \
   --data /path/to/anki-revlogs-10k \
   --out evaluation/submission-20260919/reproduction-run \
@@ -98,6 +98,8 @@ evaluation/submission-20260919/upstream/.venv/bin/python \
 Do not use the bundled `run/` directory as `--out`; it contains the published, path-redacted artifacts.
 
 For the completed full-run orchestration, see `scripts/fullrun-chain-vps.sh`.
+
+`run.py` and `serve.py` are retained unchanged because they are part of the published run's provenance. For new report generation use `run_hardened.py`; for streaming use `serve_hardened.py`.
 
 ## Verification
 
@@ -128,7 +130,8 @@ Behavioral tests:
 ```sh
 evaluation/submission-20260919/upstream/.venv/bin/python -m pytest -q \
   evaluation/submission-20260919/test_submission.py \
-  evaluation/submission-20260919/test_baseline.py
+  evaluation/submission-20260919/test_baseline.py \
+  evaluation/submission-20260919/test_hardening.py
 ```
 
 The verifier checks release checksums, frozen source/model identities, user coverage, split/calibration lineage, aggregate provenance and batch/streaming inference parity.

@@ -84,14 +84,14 @@ def digest(path):
             h.update(chunk)
     return h.hexdigest()
 
-for name in ('baseline.py', 'nested.py', 'run.py', 'verify_submission.py', 'test_baseline.py',
-             'test_submission.py', 'protocol.json', 'users.json', 'upstream-reference.jsonl',
+for name in ('baseline.py', 'nested.py', 'run.py', 'run_hardened.py', 'verify_submission.py', 'test_baseline.py',
+             'test_submission.py', 'test_hardening.py', 'protocol.json', 'users.json', 'upstream-reference.jsonl',
              'LICENSE', 'THIRD-PARTY-NOTICES.md', 'README.md', 'AUDIT.md',
              'baseline-verification.json', 'smoke-verification.json', 'pyrefly.toml'):
     add(here / name)
 for name in ('README.md', 'AUDIT.md', 'LICENSE', 'THIRD-PARTY-NOTICES.md'):
     add(here / name, name)
-for name in ('probe.py', 'serve.py', 'feature-spec.json', 'feature-spec-fresh.json'):
+for name in ('probe.py', 'serve.py', 'serve_hardened.py', 'feature-spec.json', 'feature-spec-fresh.json'):
     add(root / 'evaluation/tabular-probe-20260917' / name)
 add(root / 'evaluation/probe-stage2-20260918/stage2.py')
 add(root / 'scripts/make_submission_pack.sh')

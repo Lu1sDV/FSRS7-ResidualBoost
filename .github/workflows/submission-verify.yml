@@ -45,3 +45,4 @@ jobs:
           python -m pytest -q
           evaluation/submission-20260919/test_submission.py
           evaluation/submission-20260919/test_baseline.py
+          evaluation/submission-20260919/test_hardening.py
