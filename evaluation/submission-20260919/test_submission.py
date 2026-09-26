@@ -1,5 +1,6 @@
 """Acceptance: held-user outcomes cannot influence fitted shared stages."""
 
+import json
 import sys
 import pickle
 from pathlib import Path
@@ -380,3 +381,69 @@ def test_score_shards_cover_every_held_user_exactly_once():
     for bad in ("x/y", "9/8", "-1/8", "0/0"):
         with pytest.raises(argparse.ArgumentTypeError):
             parse_shard(bad)
+
+
+
+def _published_contract():
+    root = Path(__file__).resolve().parents[2]
+    here = root / "evaluation/submission-20260919"
+    manifest = json.loads((here / "run/manifest.json").read_text())
+    report = json.loads((here / "run/results.json").read_text())
+    return root, manifest, report
+
+
+def test_verifier_frozen_contract_accepts_published_release():
+    import verify_submission
+
+    root, manifest, report = _published_contract()
+    protocol, users, deferred = verify_submission.validate_frozen_contract(
+        root,
+        manifest,
+        report,
+        qa_only=False,
+    )
+    assert len(users) == 9999
+    assert deferred == []
+    assert report["reviews"] == protocol["expected_scored_reviews"]
+
+
+@pytest.mark.parametrize(
+    "mutation, message",
+    [
+        ("wrong-user-set", "frozen population"),
+        ("wrong-review-count", "expected_scored_reviews"),
+        ("missing-model", "model set"),
+        ("wrong-round-count", "run rounds"),
+        ("wrong-reference-hash", "reference_sha256"),
+    ],
+)
+def test_verifier_frozen_contract_rejects_same_size_but_wrong_claims(
+    mutation,
+    message,
+):
+    import verify_submission
+
+    root, manifest, report = _published_contract()
+    manifest = json.loads(json.dumps(manifest))
+    report = json.loads(json.dumps(report))
+
+    if mutation == "wrong-user-set":
+        manifest["users"][-1] = max(manifest["users"]) + 1
+    elif mutation == "wrong-review-count":
+        report["reviews"] -= 1
+    elif mutation == "missing-model":
+        report["models"].pop("B")
+    elif mutation == "wrong-round-count":
+        manifest["rounds"] -= 1
+    elif mutation == "wrong-reference-hash":
+        manifest["reference_sha256"] = "0" * 64
+    else:
+        raise AssertionError(mutation)
+
+    with pytest.raises(ValueError, match=message):
+        verify_submission.validate_frozen_contract(
+            root,
+            manifest,
+            report,
+            qa_only=False,
+        )
